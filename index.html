@@ -233,47 +233,14 @@
     function setProcessing(isProcessing) {
       subscribeButton.disabled = isProcessing;
       subscribeButton.textContent = isProcessing ? 'Subscribing...' : 'Subscribe';
-      emailInput.disabled = isProcessing;
     }
 
     async function submitSubscription(email) {
-      // Preferred attempt: JSON POST
-      const jsonBody = JSON.stringify({ email });
-      try {
-        const resp = await fetch(placeholderApiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: jsonBody
-        });
-
-        if (resp.ok) return resp;
-
-        // Non-OK response from JSON attempt — surface body when available
-        const text = await resp.text().catch(() => '');
-        throw new Error((text && text.slice(0, 200)) || `Request failed with status ${resp.status}`);
-      } catch (err) {
-        // If JSON attempt failed (likely CORS/preflight or network), try form-encoded fallback
-        try {
-          const formData = new URLSearchParams({ email });
-          const resp2 = await fetch(placeholderApiUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-            },
-            body: formData
-          });
-
-          if (resp2.ok) return resp2;
-
-          const text2 = await resp2.text().catch(() => '');
-          throw new Error((text2 && text2.slice(0, 200)) || `Fallback request failed with status ${resp2.status}`);
-        } catch (err2) {
-          // Combine errors for diagnostics
-          throw new Error((err && err.message ? err.message : String(err)) + ' | Fallback: ' + (err2 && err2.message ? err2.message : String(err2)));
-        }
-      }
+      return fetch(placeholderApiUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify({ email: email }),
+      });
     }
 
     form.addEventListener('submit', function (event) {
@@ -293,31 +260,20 @@
         return;
       }
 
-      // Optimistic UI: show immediate success and send request in background
-      setMessage('Subscribed successfully!', 'success');
-      // clear input immediately for perceived speed
+      setMessage('Subscribing...', '');
+      setProcessing(true);
+
       emailInput.value = '';
+      setMessage('Subscribed successfully!', 'success');
 
-      // Short cooldown to prevent duplicate submissions (1.5s)
-      subscribeButton.disabled = true;
-      subscribeButton.textContent = 'Subscribed';
-      setTimeout(() => {
-        subscribeButton.disabled = false;
-        subscribeButton.textContent = 'Subscribe';
-      }, 1500);
-
-      // Background submit: send request but don't block the UI
-      (async function backgroundSend(emailToSend) {
-        try {
-          await submitSubscription(emailToSend);
-          // optionally update UI if you want to confirm server acknowledgment
-        } catch (err) {
-          console.error('Background submit failed:', err);
-          const serverText = err && err.message ? String(err.message).slice(0, 300) : '';
-          // If background send fails, show an error so the user can retry
-          setMessage((serverText ? `Subscription failed: ${serverText}` : 'Subscription failed. Please try again.'), 'error');
-        }
-      })(enteredEmail);
+      submitSubscription(enteredEmail)
+        .catch((error) => {
+          console.error(error);
+          setMessage('Subscription failed. Please try again.', 'error');
+        })
+        .finally(() => {
+          setProcessing(false);
+        });
     });
   </script>
 </body>
