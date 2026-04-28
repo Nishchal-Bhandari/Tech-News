@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Tech News</title>
+  <link rel="shortcut icon" href="./icon.png" type="image/x-icon">
+  <style>
+    :root {
+      --bg: #000000;
+      --surface: #0b0b0b;
+      --surface-2: #111111;
+      --text: #ffffff;
+      --muted: rgba(255, 255, 255, 0.74);
+      --border: rgba(255, 255, 255, 0.18);
+      --border-strong: rgba(255, 255, 255, 0.36);
+      --shadow: 0 28px 80px rgba(255, 255, 255, 0.08);
+      --focus: rgba(255, 255, 255, 0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 720px;
+      opacity: 0;
+      transform: translateY(16px);
+      animation: fadeIn 700ms ease-out forwards;
+    }
+
+    .card {
+      width: 100%;
+      background: linear-gradient(180deg, var(--surface-2), var(--surface));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: clamp(28px, 5vw, 56px);
+      text-align: center;
+    }
+
+    .eyebrow {
+      margin: 0 0 18px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      font-size: 0.77rem;
+      color: var(--muted);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 6vw, 4.2rem);
+      line-height: 1.02;
+      letter-spacing: -0.05em;
+    }
+
+    .subtitle {
+      margin: 18px auto 0;
+      max-width: 38rem;
+      font-size: clamp(1rem, 2.7vw, 1.15rem);
+      line-height: 1.6;
+      color: var(--muted);
+    }
+
+    .subscribe-form {
+      margin: 34px auto 0;
+      max-width: 560px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .input-row {
+      display: grid;
+      gap: 12px;
+    }
+
+    .email-input {
+      width: 100%;
+      padding: 16px 18px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text);
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease, background 180ms ease;
+    }
+
+    .email-input::placeholder {
+      color: rgba(255, 255, 255, 0.42);
+    }
+
+    .email-input:focus {
+      border-color: var(--border-strong);
+      box-shadow: 0 0 0 4px var(--focus);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .subscribe-button {
+      width: 100%;
+      padding: 16px 18px;
+      border: 1px solid var(--text);
+      border-radius: 14px;
+      background: var(--text);
+      color: var(--bg);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 180ms ease, background 180ms ease, color 180ms ease, border-color 180ms ease, opacity 180ms ease;
+    }
+
+    .subscribe-button:hover:not(:disabled) {
+      background: var(--bg);
+      color: var(--text);
+      transform: translateY(-1px);
+    }
+
+    .subscribe-button:disabled {
+      cursor: wait;
+      opacity: 0.7;
+      transform: none;
+    }
+
+    .message {
+      min-height: 1.4em;
+      margin: 0;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      color: var(--muted);
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .message[data-state="error"] {
+      color: #ffffff;
+    }
+
+    .message[data-state="success"] {
+      color: #ffffff;
+    }
+
+    .footer-note {
+      margin: 22px 0 0;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 16px;
+      }
+
+      .card {
+        border-radius: 20px;
+      }
+
+      .subscribe-form {
+        margin-top: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="card" aria-labelledby="page-title">
+      <p class="eyebrow">Daily Briefing</p>
+      <h1 id="page-title">Daily Tech News</h1>
+      <p class="subtitle">Get the latest tech and AI news delivered to your inbox</p>
+
+      <form class="subscribe-form" id="subscribe-form" novalidate>
+        <div class="input-row">
+          <input
+            class="email-input"
+            id="email-input"
+            type="email"
+            name="email"
+            placeholder="Enter your email"
+            autocomplete="email"
+            aria-describedby="message"
+          />
+          <button class="subscribe-button" id="subscribe-button" type="submit">Subscribe</button>
+        </div>
+        <p class="message" id="message" role="status" aria-live="polite"></p>
+      </form>
+
+      <p class="footer-note">Minimal news updates. No noise. Just the essentials.</p>
+    </section>
+  </main>
+
+  <script>
+    const form = document.getElementById('subscribe-form');
+    const emailInput = document.getElementById('email-input');
+    const subscribeButton = document.getElementById('subscribe-button');
+    const message = document.getElementById('message');
+
+    // Configurable endpoint: set data-endpoint on the form or window.SUBSCRIBE_ENDPOINT
+    const placeholderApiUrl = form.dataset.endpoint || window.SUBSCRIBE_ENDPOINT || 'https://script.google.com/macros/s/AKfycby9qSgTCYdqlvI8BPdGy6IZ3EE6XWxPTMTj1RNyJDX1ITB9PYkkJDAGU2yWvP4ki-LT/exec';
+
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    function setMessage(text, state) {
+      message.textContent = text;
+      message.dataset.state = state || '';
+    }
+
+    function setProcessing(isProcessing) {
+      subscribeButton.disabled = isProcessing;
+      subscribeButton.textContent = isProcessing ? 'Subscribing...' : 'Subscribe';
+      emailInput.disabled = isProcessing;
+    }
+
+    async function submitSubscription(email) {
+      // Preferred attempt: JSON POST
+      const jsonBody = JSON.stringify({ email });
+      try {
+        const resp = await fetch(placeholderApiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: jsonBody
+        });
+
+        if (resp.ok) return resp;
+
+        // Non-OK response from JSON attempt — surface body when available
+        const text = await resp.text().catch(() => '');
+        throw new Error((text && text.slice(0, 200)) || `Request failed with status ${resp.status}`);
+      } catch (err) {
+        // If JSON attempt failed (likely CORS/preflight or network), try form-encoded fallback
+        try {
+          const formData = new URLSearchParams({ email });
+          const resp2 = await fetch(placeholderApiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+            },
+            body: formData
+          });
+
+          if (resp2.ok) return resp2;
+
+          const text2 = await resp2.text().catch(() => '');
+          throw new Error((text2 && text2.slice(0, 200)) || `Fallback request failed with status ${resp2.status}`);
+        } catch (err2) {
+          // Combine errors for diagnostics
+          throw new Error((err && err.message ? err.message : String(err)) + ' | Fallback: ' + (err2 && err2.message ? err2.message : String(err2)));
+        }
+      }
+    }
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      const enteredEmail = emailInput.value.trim();
+
+      if (!enteredEmail) {
+        setMessage('Please enter your email', 'error');
+        emailInput.focus();
+        return;
+      }
+
+      if (!emailPattern.test(enteredEmail)) {
+        setMessage('Enter a valid email address', 'error');
+        emailInput.focus();
+        return;
+      }
+
+      // Optimistic UI: show immediate success and send request in background
+      setMessage('Subscribed successfully!', 'success');
+      // clear input immediately for perceived speed
+      emailInput.value = '';
+
+      // Short cooldown to prevent duplicate submissions (1.5s)
+      subscribeButton.disabled = true;
+      subscribeButton.textContent = 'Subscribed';
+      setTimeout(() => {
+        subscribeButton.disabled = false;
+        subscribeButton.textContent = 'Subscribe';
+      }, 1500);
+
+      // Background submit: send request but don't block the UI
+      (async function backgroundSend(emailToSend) {
+        try {
+          await submitSubscription(emailToSend);
+          // optionally update UI if you want to confirm server acknowledgment
+        } catch (err) {
+          console.error('Background submit failed:', err);
+          const serverText = err && err.message ? String(err.message).slice(0, 300) : '';
+          // If background send fails, show an error so the user can retry
+          setMessage((serverText ? `Subscription failed: ${serverText}` : 'Subscription failed. Please try again.'), 'error');
+        }
+      })(enteredEmail);
+    });
+  </script>
+</body>
+</html>
